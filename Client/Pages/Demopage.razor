@@ -1,0 +1,118 @@
+﻿@page "/demopage"
+@using BlazorInputFile;
+<h3>@status</h3>
+
+
+@*<BlazorInputFile.InputFile OnChange="HandleSelection" />*@
+
+@*<InputFile OnChange="FileUpload"/>*@
+
+@code {
+    string? status;
+    /// <summary>
+    /// Below method is Working and returns base64 string
+    /// this code is from nuget <BlazorInputFile>
+    /// </summary>
+    /// <param name="files"></param>
+    /// <returns></returns>
+    async Task HandleSelection(IFileListEntry[] files)
+    {
+        var file = files.FirstOrDefault();
+        if (file != null)
+        {
+            // Just load into .NET memory to show it can be done
+            // Alternatively it could be saved to disk, or parsed in memory, or similar
+            var ms = new MemoryStream();
+            await file.Data.CopyToAsync(ms);
+            var bytesData = ms.ToArray();
+            String fileString = Convert.ToBase64String(bytesData);
+            status = $"Finished loading {file.Size} bytes from {file.Name}";
+        }
+    }
+
+    /// <summary>
+    /// This method is used from basic default control
+    /// </summary>
+    /// <param name="e"></param>
+    /// <returns></returns>
+
+    async Task FileUpload(InputFileChangeEventArgs e)
+    {
+
+        /////WORKING WAY-1
+        MemoryStream ms = new MemoryStream();
+        await e.File.OpenReadStream(e.File.Size).CopyToAsync(ms);
+        var bytes = ms.ToArray();
+        String file = Convert.ToBase64String(bytes);
+
+
+        // working way -2
+        //foreach (IBrowserFile imgFile in e.GetMultipleFiles(5))
+        //{
+        //    var buffers = new byte[imgFile.Size];
+        //    await imgFile.OpenReadStream().ReadAsync(buffers);
+        //    string imageType = imgFile.ContentType;
+        //    string imgUrl = Convert.ToBase64String(buffers);
+        //    //string imgUrl = $"data:{imageType};base64,{Convert.ToBase64String(buffers)}";
+        //    //imgUrls.Add(imgUrl);
+        //}
+
+        ///////POSSIBLE WAY-1
+        //using (var fileStream = e.File.OpenReadStream())
+        //using (var ms = new MemoryStream())
+        //{
+        //    fileStream.CopyTo(ms);
+        //    ms.Position = 0;
+        //    var fileBytes = ms.ToArray();
+        //    string s = Convert.ToBase64String(fileBytes);
+        //    //fileIn.FileData = s;
+        //}
+
+
+        ///////POSSIBLE WAY-2
+        //var file = e.File;
+        //if (file != null)
+        //{
+        //    // Just load into .NET memory to show it can be done
+        //    // Alternatively it could be saved to disk, or parsed in memory, or similar
+        //    var ms = new MemoryStream();
+        //    await file.Data.CopyToAsync(ms);
+        //    var bytesData = ms.ToArray();
+        //    String fileString = Convert.ToBase64String(bytesData);
+        //    //status = $"Finished loading {file.Size} bytes from {file.Name}";
+        //}
+
+
+
+        ///////POSSIBLE WAY-3
+        //var imgFile = new List<ImageFile>();
+        //var files = e.GetMultipleFiles(); // get the files selected by the users
+        //foreach (var file in files)
+        //{
+        //    var resizedFile = await file.RequestImageFileAsync(file.ContentType, 640, 480); // resize the image file
+        //    var buf = new byte[resizedFile.Size]; // allocate a buffer to fill with the file's data
+        //    using (var stream = resizedFile.OpenReadStream())
+        //    {
+        //        await stream.ReadAsync(buf); // copy the stream to the buffer
+        //    }
+        //    filesBase64.Add(new ImageFile { base64data = Convert.ToBase64String(buf), contentType = file.ContentType, fileName = file.Name }); // convert to a base64 string!!
+        //}
+
+        ///////POSSIBLE WAY-4
+        //var fileContent = new StreamContent(e.File.OpenReadStream(e.File.Size));
+        //fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(e.File.ContentType);
+        //Byte[] bytes = File.ReadAllBytes("path");
+        //String file = Convert.ToBase64String(bytes);
+        //Modal.PhotoName = e.File.Name;
+
+
+    }
+
+
+    //public class ImageFile{
+    //    public string base64data { get; set; }
+    //    public string contentType { get; set; }
+    //    public string fileName { get; set; }
+    //}
+
+}

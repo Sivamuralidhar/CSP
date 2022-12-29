@@ -1,0 +1,62 @@
+﻿@page "/getgeekprofile"
+
+@using CSP.Shared
+@using System.Text.Json;
+@inject HttpClient client
+
+@*<PageTitle>Get GeekProfile Info</PageTitle>*@
+
+<h1>Get GeekProfile Info</h1>
+<hr class="solid">
+
+@if (geekProfiles == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>FullName</th>
+                <th>DateOfBirth. (C)</th>
+                <th>Gender</th>
+                <th>HighestQualification</th>
+                <th>Profile CreatedOn</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var geekProfile in geekProfiles)
+            {
+                <tr>
+                    <td>@geekProfile.FullName </td>
+                    <td>@geekProfile.DateOfBirth</td>
+                    <td>@geekProfile.Gender</td>
+                    <td>@geekProfile.HighestQualification</td>
+                    <td>@geekProfile.CreatedOn</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    //private WeatherForecast[]? forecasts;    //private WeatherForecast[]? forecasts;
+    private List<GeekProfileInfo>? geekProfiles;
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var httpResponse = await client.GetAsync($"api/GeekProfile/GetGeekProfiles");
+
+        if (!httpResponse.IsSuccessStatusCode)
+        {
+            // set error message for display, log to console and return
+            string errorMessage = httpResponse.ReasonPhrase;
+            Console.WriteLine($"There was an error! {errorMessage}");
+            return;
+        }
+
+        // convert http response data to UsersResponse object
+        geekProfiles = await httpResponse.Content.ReadFromJsonAsync<List<GeekProfileInfo>>();
+    }
+}

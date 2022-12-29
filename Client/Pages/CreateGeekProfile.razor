@@ -1,0 +1,306 @@
+﻿@page "/creategeekprofile"
+@using System.ComponentModel.DataAnnotations
+@using BlazorInputFile;
+@using CSP.Shared;
+@using System.Text.Json;
+@using System.Text;
+@inject HttpClient client
+
+
+<h3><b> Create GeekProfile</b></h3>
+<hr class="solid">
+<div>
+
+    <BSForm Model="Modal" IsRow="true" Gutters="Gutters.Medium" OnSubmit="OnSubmit" OnReset="Reset">
+        <DataAnnotationsValidator />
+        <BSModal DataId="modal1">
+            <Header>Save Geek Profile</Header>
+            <Content>@_message</Content>
+            <Footer Context="modal">
+                <BSButton MarginStart="Margins.Auto" Color="BSColor.Secondary" @onclick="modal.HideAsync">Ok</BSButton>
+            </Footer>
+        </BSModal>
+
+        <BSCol Position="Position.Relative" ColumnMedium="4">
+            <BSLabel>Full name</BSLabel>
+            <BSInput InputType="InputType.Text" @bind-Value="Modal.FullName" ValidateOnInput="true" />
+            <BSFeedback For="@(() => Modal.FullName)" ValidMessage="Full name looks good." />
+        </BSCol>
+        <BSCol Position="Position.Relative" ColumnMedium="4">
+            <BSLabel>Date of Birth (dd/mm/yyyy)</BSLabel>
+            <BSInput InputType="InputType.Date" @bind-Value="Modal.DateOfBirth" />
+            <BSFeedback For="@(() => Modal.DateOfBirth)" ValidMessage="DateOfBirth name looks good." />
+        </BSCol>
+        @*  <BSCol Position="Position.Relative" ColumnMedium="3">
+        <div class="control-group">
+        <BSLabel Class="control-label col-sm-2"> Gender </BSLabel>
+        <div class="controls">
+        <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="option1">
+        <label class="form-check-label" for="inlineRadio1">Male</label>
+        </div>
+        <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="option2">
+        <label class="form-check-label" for="inlineRadio2">Female</label>
+        </div>
+        </div>
+        </div>
+        </BSCol>*@
+
+        <BSCol Position="Position.Relative" ColumnMedium="3">
+            <div>
+                <BSLabel>Select Gender</BSLabel>
+            </div>
+            <BSInput InputType="InputType.Select" @bind-Value="Modal.Gender">
+                <option value="null">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+            </BSInput>
+        </BSCol>
+
+        <BSCol Position="Position.Relative" ColumnMedium="4">
+            <BSLabel>HighestQualification</BSLabel>
+            <BSInput InputType="InputType.Text" @bind-Value="Modal.HighestQualification" />
+            <BSFeedback For="@(() => Modal.HighestQualification)" ValidMessage="Highest Qualification looks good." />
+        </BSCol>
+        <BSCol Position="Position.Relative" ColumnMedium="6">
+            <BSLabel>Upload Certificates(Optional)</BSLabel>
+            <BSInputFile ValidWhen="@(() => Modal.HasUploadedHighestQualificationCert)" OnChange="OnUploadHighestQualificationCertificate" />
+            <BSFeedback For="@(() => Modal.HasUploadedHighestQualificationCert)" ValidMessage="" />
+        </BSCol>
+
+        <BSCol Column="12">
+            <BSLabel>Write a brief descriptions about yourself</BSLabel>
+            <textarea class="form-control" @bind="Modal.ProfileBriefDescription" rows="4" id="additionalInfo" placeholder=""></textarea>
+        </BSCol>
+
+
+        <BSCol Position="Position.Relative" ColumnMedium="6">
+            <BSLabel>Upload professional photo </BSLabel>
+            <BSInputFile ValidWhen="@(() => Modal.UploadProfessionalPhoto)" OnChange="OnUploadProfessionalPhoto" />
+            <BSFeedback For="@(() => Modal.UploadProfessionalPhoto)" ValidMessage="ProfessionalPhoto Uploaded." />
+        </BSCol>
+        <BSCol Position="Position.Relative" ColumnMedium="6">
+            <BSLabel>Academic Certifications/ Awards/ Recognitions/Testimonials (Optional)</BSLabel>
+            <BSInputFile ValidWhen="@(() => Modal.HasAcademicCertificate)" OnChange="OnUploadAcademicCertifications" />
+            <BSFeedback For="@(() => Modal.HasAcademicCertificate)" ValidMessage="AcademicCertification Uploaded." />
+        </BSCol>
+        <BSCol Column="12">
+            <BSLabel>Select Langauge</BSLabel>
+            <BSInput InputType="InputType.Select" @bind-Value="Modal.SelectedPreferredLanguage">
+
+
+                @foreach (var language in LanguageList)
+                {
+                    <option value="@language.LanguageName"> @language.LanguageName </option>
+                }
+            </BSInput>
+        </BSCol>
+        <BSCol Position="Position.Relative" ColumnMedium="3">
+            <BSInput InputType="InputType.Select" @bind-Value="Modal.SelectedPrimarySkill">
+                <option value="null">Select the primary skill</option>
+                <option value="Software">Software</option>
+                <option value="Hardware">Hardware</option>
+            </BSInput>
+        </BSCol>
+        <BSCol Position="Position.Relative" ColumnMedium="5">
+            <BSInput InputType="InputType.Select" @bind-Value="Modal.SelectedSecondarySkill">
+                <option value="null">Select the SecondarySkill(Optional) </option>
+                <option value="CAMCAD">CAMCAD</option>
+                <option value="MachineryOperator">MachineryOperator</option>
+            </BSInput>
+        </BSCol>
+        <BSCol Column="12">
+            <BSLabel>Upload skill certifications</BSLabel>
+            <BSInputFile ValidWhen="@(() => Modal.IsSkillCertificationUploaded)" OnChange="OnUploadSkillCertification" />
+            <BSFeedback For="@(() => Modal.IsSkillCertificationUploaded)" ValidMessage="Skill Certification Certificate Uploaded" />
+        </BSCol>
+
+        <BSButton IsSubmit="true" Class="btnsubmit" Target="modal1" Color="BSColor.Primary">Submit</BSButton>
+    </BSForm>
+
+</div>
+@code {
+
+    EmployeeModal Modal { get; set; } = new EmployeeModal();
+    private string? _message { get; set; } = string.Empty;
+
+    bool _buttonDisabled = true;
+    private BSAlert? _alertRef;
+
+    List<Language> LanguageList = new List<Language>()
+    { new Language(0,"--Select--", "NONE"),
+    new Language(1,"English", "Eng"),
+    new Language(2,"Hindi", "Hin"),
+    new Language(3,"French", "Fre")
+    };
+
+
+    #region METHODS
+
+    private async Task OnUploadAcademicCertifications(InputFileChangeEventArgs e)
+    {
+        Modal.HasAcademicCertificate = false;
+        if (e.FileCount > 0)
+        {
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream(e.File.Size).CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            String file = Convert.ToBase64String(bytes);
+            Modal.AcademicCertificationsValue = file;
+            Modal.HasAcademicCertificate = true;
+        }
+    }
+
+    private async Task OnUploadSkillCertification(InputFileChangeEventArgs e)
+    {
+        Modal.IsSkillCertificationUploaded = null;
+        if (e.FileCount > 0)
+        {
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream(e.File.Size).CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            String file = Convert.ToBase64String(bytes);
+            Modal.SkillCertificateValue = file;
+            Modal.IsSkillCertificationUploaded = true;
+        }
+    }
+
+    private async Task OnUploadProfessionalPhoto(InputFileChangeEventArgs e)
+    {
+        Modal.HasUploadedProfessionalPhoto = null;
+        if (e.FileCount > 0)
+        {
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream(e.File.Size).CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            String file = Convert.ToBase64String(bytes);
+            Modal.ProfilePhoto = file;
+            Modal.HasUploadedProfessionalPhoto = true;
+        }
+    }
+
+    private async Task OnUploadHighestQualificationCertificate(InputFileChangeEventArgs e)
+    {
+        Modal.HasUploadedHighestQualificationCert = null;
+        if (e.FileCount > 0)
+        {
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream(e.File.Size).CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            String file = Convert.ToBase64String(bytes);
+            Modal.HighestQualificationCertValue = file;
+            Modal.HasUploadedHighestQualificationCert = true;
+        }
+    }
+
+    public async Task OnSubmit(EditContext e)
+    {
+        //if (e.Validate())
+        //{
+        try
+        {
+            HttpClient client = new HttpClient();
+
+            using var httpResponse = await client.PostAsJsonAsync($"http://localhost:5209/api/GeekProfile/CreateGeekProfiles", Modal);
+            if (!httpResponse.IsSuccessStatusCode)
+            {
+                // set error message for display, log to console and return
+                string? errorMessage = httpResponse.ReasonPhrase;
+                Console.WriteLine($"There was an error! {errorMessage}");
+            }
+            _message = "Details submitted successfully.";
+            Reset();
+            return;
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = ex.ToString();
+        }
+        //}
+    }
+
+    public void Reset()
+    {
+        Modal = new EmployeeModal();
+    }
+
+    private void Show()
+    {
+        _buttonDisabled = true;
+        _alertRef?.Open();
+    }
+
+    private void Dismissed()
+    {
+        _buttonDisabled = false;
+    }
+    #endregion
+
+
+    #region MODELS
+
+    public class EmployeeModal
+    {
+        [Required(ErrorMessage = "Full name must be provided.")]
+        public string? FullName { get; set; }
+        public string? DateOfBirth { get; set; }
+
+        [Required(ErrorMessage = "Please select any gender")]
+        public string? Gender { get; set; }
+
+        public string? HighestQualification { get; set; }
+        public string? HighestQualificationCertValue { get; set; }
+        public string? UploadSkillCertification { get; set; }
+
+        public string? ProfileBriefDescription { get; set; }
+
+        [Required(ErrorMessage = " Please upload profile photo")]
+        public string? ProfilePhoto { get; set; }
+        public string? AcademicCertificationsValue { get; set; }
+        [Required(ErrorMessage = " Please provide the language")]
+        public string? SelectedPreferredLanguage { get; set; }
+
+        public string? SelectedPrimarySkill { get; set; }
+        public string? SelectedSecondarySkill { get; set; }
+
+        [Required(ErrorMessage = " Please upload skill certificate")]
+        public string? SkillCertificateValue { get; set; }
+
+        public string? CreatedBy { get; set; } = "InternalDemoUser";
+
+
+
+        public bool? HasAcademicCertificate { get; set; }
+
+        public bool? IsSkillCertificationUploaded { get; set; }
+        public bool? HasUploadedHighestQualificationCert { get; set; }
+
+        public bool? HasUploadedProfessionalPhoto { get; set; }
+
+
+        public bool? AcademicCertifications { get; set; }
+        public bool? UploadProfessionalPhoto { get; set; }
+    }
+
+    public class Language
+    {
+        public Language(int lId, string? lname, string? lcode)
+        {
+            LanguageId = lId;
+            LanguageName = lname;
+            LanguageShortCode = lcode;
+        }
+        public int LanguageId { get; set; }
+        public string? LanguageName { get; set; }
+        public string? LanguageShortCode { get; set; }
+    }
+
+
+    #endregion
+}
+
+
+
+
+
