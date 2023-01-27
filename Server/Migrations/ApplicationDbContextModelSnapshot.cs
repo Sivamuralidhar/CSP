@@ -198,7 +198,7 @@ namespace CSP.Server.Migrations
 
                     b.HasKey("GeekProfileId");
 
-                    b.ToTable("GeekProfiles");
+                    b.ToTable("CSPGeekProfiles");
                 });
 #pragma warning restore 612, 618
         }

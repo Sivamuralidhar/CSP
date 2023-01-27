@@ -1,90 +1,73 @@
 ﻿@page "/testingpage"
 <h3>TestingPage</h3>
+@inject HttpClient httpClient;
 
+<div class="row">
+    <div class="col-auto">
+        <select class="form-select" @bind="@this.FilterItem">
+            <option selected disabled>--Filter--</option>
+            @foreach (var r in Continents)
+            {
+                <option value="@r">@r</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary" @onclick=this.OnFilter>Filter</button>
+    </div>
+    <div class="col-2">
+    </div>
+    <div class="col-auto">
 
-@using System.ComponentModel.DataAnnotations
-<BSForm Model="Modal" IsRow="true" Gutters="Gutters.Medium" OnSubmit="OnSubmit" OnReset="Reset">
-    <DataAnnotationsValidator />
-    @*<BSCol Position="Position.Relative" ColumnMedium="12">
-    @_message
-    <BSValidationSummary />
-    </BSCol>*@
-    <BSCol Position="Position.Relative" ColumnMedium="4">
-        <BSLabel>First name</BSLabel>
-        <BSInput InputType="InputType.Text" @bind-Value="Modal.FirstName" ValidateOnInput="true" />
-        <BSFeedback For="@(() => Modal.FirstName)" ValidMessage="First name looks good." />
-    </BSCol>
-    <BSCol Position="Position.Relative" ColumnMedium="4">
-        <BSLabel>Middle name</BSLabel>
-        <BSInput InputType="InputType.Text" @bind-Value="Modal.MiddleName" />
-        @*<BSFeedback For="@(() => Modal.MiddleName)" ValidMessage="Middle name looks good." />*@
-    </BSCol>
-    <BSCol Position="Position.Relative" ColumnMedium="4">
-        <BSLabel>Last name</BSLabel>
-        <BSInput InputType="InputType.Text" @bind-Value="Modal.LastName" />
-        <BSFeedback For="@(() => Modal.LastName)" ValidMessage="Last name looks good." />
-    </BSCol>
-    <BSCol Position="Position.Relative" ColumnMedium="4">
-        <BSLabel>Email Address</BSLabel>
-        <BSInput InputType="InputType.Text" @bind-Value="Modal.Email" placeholder="Email Address" />
-        <BSFeedback For="@(() => Modal.Email)" ValidMessage="Email address looks good." />
-    </BSCol>
-    <BSCol Position="Position.Relative" ColumnMedium="6">
-        <BSLabel>Photo</BSLabel>
-        <BSInputFile ValidWhen="@(() => Modal.HasPendingPhoto)" OnChange="OnFileChange" />
-        @*<BSFeedback For="@(() => Modal.HasPendingPhoto)" ValidMessage="Looks like you selected a photo." />*@
-    </BSCol>
+        <select class="form-select" value="@this.FilterAuto" @onchange=this.OnValueChanged>
+            <option selected disabled>--Filter--</option>
+            @foreach (var r in Continents)
+            {
+                <option value="@r">@r</option>
+            }
+        </select>
+    </div>
+</div>
 
-    <BSInputGroup MarginBottom="Margins.Medium"> 
-        <BSInput InputType="InputType.TextArea" @bind-Value="_testMessage"></BSInput>
-    </BSInputGroup>
-    <BSCol Column="12">
-        <BSButton Color="BSColor.Primary" IsSubmit="true">Submit</BSButton>
-        <BSButton Color="BSColor.Primary" IsReset="true" @onclick="Reset">Reset</BSButton>
-    </BSCol>
-</BSForm>
+<div class="mt-3">
+    <h2>Filtered List of Countries</h2>
+    @foreach (var item in Countries)
+    {
+        <div>@item.country - @item.continent</div>
+    }
+
+</div>
+
 @code {
-    private EmployeeModal Modal { get; set; } = new EmployeeModal();
-    private string _message = "";
-    private string _testMessage { get; set; } = "testing";
-    private void OnFileChange(InputFileChangeEventArgs e)
+    private string? FilterAuto;
+    private string? FilterItem;
+
+    private IEnumerable<Country> Countries = Enumerable.Empty<Country>();
+
+    private async Task OnValueChanged(ChangeEventArgs e)
     {
-        Modal.HasPendingPhoto = null;
-        if (e.FileCount > 0)
+        this.FilterAuto = e.Value?.ToString() ?? string.Empty;
+        await FilterOnItem(this.FilterAuto);
+    }
+
+    private async Task OnFilter()
+    => await this.FilterOnItem(this.FilterItem);
+
+    private async Task FilterOnItem(string? value)
+    {
+        if (value is not null)
         {
-            Modal.HasPendingPhoto = true;
-            Modal.PhotoName = e.File.Name;
+            // source country file is https://github.com/samayo/country-json/blob/master/src/country-by-continent.json
+            var list = await httpClient.GetFromJsonAsync<IEnumerable<Country>>("sample-data/countries.json") ?? Enumerable.Empty<Country>();
+            this.Countries = list.Where(item => item.continent == value);
         }
     }
-    private void OnSubmit(EditContext e)
+
+    private IEnumerable<string> Continents = new List<string> { "Africa", "Asia", "Europe", "Oceania", "North America", "South America" };
+
+    public class Country
     {
-        if (e.Validate())
-        {
-            _message = "Submitted to database";
-        }
-    }
-    public class EmployeeModal
-    {
-        [Required(ErrorMessage = "Employee's First name must be provided.")]
-        public string? FirstName { get; set; }
-
-        public string? MiddleName { get; set; }
-
-        [Required(ErrorMessage = "Employee's Last name must be provided.")]
-        public string? LastName { get; set; }
-
-        [Required(ErrorMessage = "Employee's Email address must be provided.")]
-        [EmailAddress(ErrorMessage = "Employee's Email address must be valid.")]
-        public string? Email { get; set; }
-
-        //[Required(ErrorMessage = "Employee must have a photo")]
-        public bool? HasPendingPhoto { get; set; }
-        public string? PhotoName { get; set; }
-    }
-    public void Reset()
-    {
-        Modal = new EmployeeModal();
+        public string country { get; set; } = string.Empty;
+        public string continent { get; set; } = string.Empty;
     }
 }
-
-

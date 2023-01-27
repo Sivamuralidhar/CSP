@@ -18,6 +18,7 @@ builder.Services.AddScoped<ICorporateServiceProviderProfileService, CSProfileSer
 builder.Services.AddBlazorStrap();
 
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -35,7 +36,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-
+app.UseCors(cors => cors
+.AllowAnyMethod()
+.AllowAnyHeader()
+.SetIsOriginAllowed(origin => true)
+.AllowCredentials()
+);
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");

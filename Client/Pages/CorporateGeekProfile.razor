@@ -1,0 +1,620 @@
+﻿@page "/"
+@page "/corporategeekprofile"
+<div class="mb-4">
+    <h3><b>Corporate Geek Profile </b>  </h3>
+    <!-- Solid divider -->
+    <hr class="solid">
+</div>
+@using System.ComponentModel.DataAnnotations
+@using System.Text;
+@using CSP.Client.Utilities;
+<BSForm Model="Modal" IsRow="true" Gutters="Gutters.Medium" OnSubmit="OnSubmit" OnReset="Reset">
+    <DataAnnotationsValidator />
+    @*<BSCol Position="Position.Relative" ColumnMedium="12">
+    @_message
+    <BSValidationSummary />
+    </BSCol>*@
+    <BSModal DataId="modal1">
+        <Header>Saved CSP Changes</Header>
+        <Content>@_message</Content>
+        <Footer Context="modal">
+            <BSButton MarginStart="Margins.Auto" Color="BSColor.Secondary" @onclick="modal.HideAsync">Ok</BSButton>
+        </Footer>
+    </BSModal>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Company Name</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.CompanyName" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.CompanyName)" ValidMessage="Full name looks good." />
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Select the type of company</BSLabel>
+        <BSInput InputType="InputType.Select" @bind-Value="Modal.CompanyType">
+            <option value=null>Select</option>
+            <option value="Proprietary">Proprietary</option>
+            <option value="Partnership">Partnership</option>
+            <option value="LLP">LLP</option>
+            <option value="PvtLtd">Pvt Ltd</option>
+            <option value="LTD">LTD</option>
+        </BSInput>
+    </BSCol>
+
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Primary Contact Email Id</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.EmailAddress" placeholder="Email Address" />
+        <BSFeedback For="@(() => Modal.EmailAddress)" ValidMessage="Email address looks good." />
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Primary Contact name</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.FullName" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.FullName)" ValidMessage="Full name looks good." />
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Primary Contact MobileNumber</BSLabel>
+        <BSInput InputType="InputType.Text" ValidateOnInput="true" @bind-Value="Modal.MobileNumber" />
+        <BSFeedback For="@(() => Modal.MobileNumber)" ValidMessage="Mobile number looks good." />
+    </BSCol>
+    @*<BSCol Position="Position.Relative" ColumnMedium="4">
+    <BSLabel>Company Registration Document</BSLabel>
+    <BSInputFile ValidWhen="@(() => Modal.CompanyRegistrationDoc )" OnChange="OnCompanyRegistrationDocUpload" />
+    <BSFeedback For="@(() => Modal.CompanyRegistrationDoc)" ValidMessage="" />
+    </BSCol>*@
+    @*  <BSCol Column="12">
+    <div Class="@BS.Form_Check">
+    <input class="form-check-input" type="checkbox" id="chkIncorporate" name="option1" value="something" checked="@isAllowedToIncorporate" @oninput="@AllowedToIncorporate">
+    <label class="form-check-label">Allowed to enter data of incorporation</label>
+    </div>
+    </BSCol>*@
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Add Date of Incorporation (dd/mm/yyyy)</BSLabel>
+        <BSInput InputType="InputType.Date" @bind-Value="Modal.AddDateOfIncorporation" />
+        @*<BSFeedback For="@(() => Modal.AddDateOfIncorporation)" ValidMessage="DateOfIncorporation name looks good." />*@
+    </BSCol>
+
+    <BSCol Column="12">
+        <div Class="@BS.Form_Check_Inline">
+            <BSLabel IsCheckLabel="true"><b>Select the type of Address :</b></BSLabel>
+        </div>
+        <div Class="@BS.Form_Check_Inline">
+            <input class="form-check-input" type="checkbox" id="chkRegisteredOfficeAddress" checked="@isRegisteredOfficeChecked" name="option2" @oninput="RegisteredOfficeAddressCheckboxChanged" value="something">
+            <BSLabel IsCheckLabel="true">Registered Office Address</BSLabel>
+        </div>
+        <div Class="@BS.Form_Check_Inline">
+            <input class="form-check-input" type="checkbox" id="chkWorkLocationAddress" checked="@isWorkLocationChecked" name="option2" @oninput="WorkLocationAddressCheckboxChanged" value="something">
+            <BSLabel IsCheckLabel="true"> Work Location Address</BSLabel>
+        </div>
+
+        <div Class="@BS.Form_Check_Inline">
+            <input class="form-check-input" type="checkbox" id="chkBothAddressTypes" checked="@bothAddressTypeSelected" name="option2" @oninput="AddressTypeBothCheckboxChanged" value="something">
+            <BSLabel IsCheckLabel="true">Both</BSLabel>
+        </div>
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Zip/Pin</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.Zipcode" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.Zipcode)" ValidMessage="Zipcode looks good." />
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>AddressLine1</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.AddressLine1" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.AddressLine1)" ValidMessage="AddressLine1 looks good." />
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>AddressLine2</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.AddressLine2" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.AddressLine2)" ValidMessage="AddressLine2 looks good." />
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>AddressLine3</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.AddressLine3" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.AddressLine3)" ValidMessage="" />
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>City</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.City" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.City)" ValidMessage="City looks good." />
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>State</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.State" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.State)" ValidMessage="State looks good." />
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Country</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.Country" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.Country)" ValidMessage="Country looks good." />
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Landline Number</BSLabel>
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.LandlineNumber" ValidateOnInput="true" />
+        <BSFeedback For="@(() => Modal.LandlineNumber)" ValidMessage="Landline Number looks good." />
+    </BSCol>
+    <BSCol Column="12">
+        <BSLabel><b>Write a brief descriptions about company and its offerings</b></BSLabel>
+        <BSInput InputType="InputType.TextArea" @bind-Value="Modal.CompanyOfferingsAndDescription"></BSInput>
+
+    </BSCol>
+    <BSCol Column="6">
+        <BSLabel>Upload Company Logo</BSLabel>
+        <BSInputFile ValidWhen="@(() => Modal.isCompanyLogoUploaded)" OnChange="OnCompanyLogoUpload" />
+        <BSFeedback For="@(() => Modal.isCompanyLogoUploaded)" ValidMessage="" />
+    </BSCol>
+    <BSCol Column="6">
+        <BSLabel>Upload office address proof</BSLabel>
+        <BSInputFile ValidWhen="@(() => Modal.OfficeAddress)" OnChange="OnOfficeAddressUpload" />
+        <BSFeedback For="@(() => Modal.OfficeAddress)" ValidMessage="" />
+    </BSCol>
+
+
+
+    <BSCol Column="12">
+        <BSLabel><b>Enter the following details and upload mandatory documents</b></BSLabel>
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.CompanyINCertNumber" placeholder="Company Incorportion Number" />
+        <BSFeedback For="@(() => Modal.CompanyINCertNumber)" ValidMessage="Company Incorporation Number looks good." />
+    </BSCol>
+
+    <BSCol Align="Align.End" Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Upload Company Incorporation Certificate</BSLabel>
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSInputFile ValidWhen="@(() => Modal.CompanyINCert)" OnChange="OnCompanyInCorpCertUpload" />
+        <BSFeedback For="@(() => Modal.CompanyINCert)" ValidMessage="" />
+    </BSCol>
+
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.CompanyPanNumber" placeholder="Company Pan Number" />
+        <BSFeedback For="@(() => Modal.CompanyPanNumber)" ValidMessage="CompanyPanNumber looks good." />
+    </BSCol>
+    <BSCol Align="Align.End" Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Upload PAN Copy</BSLabel>
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSInputFile ValidWhen="@(() => Modal.CompanyPanCertEnabled)" OnChange="OnCompanyPanCertUpload" />
+        <BSFeedback For="@(() => Modal.CompanyPanCertEnabled)" ValidMessage="" />
+    </BSCol>
+
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.GSTNumber" placeholder="GST Number" />
+        <BSFeedback For="@(() => Modal.GSTNumber)" ValidMessage="" />
+    </BSCol>
+    <BSCol Align="Align.End" Position="Position.Relative" ColumnMedium="4">
+        <BSLabel>Upload GST Registration Certificate</BSLabel>
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="4">
+        <BSInputFile ValidWhen="@(() => Modal.isGSTEnabled)" OnChange="OnCompanyGSTCertUpload" />
+        <BSFeedback For="@(() => Modal.isGSTEnabled)" ValidMessage="" />
+    </BSCol>
+
+
+
+
+    <BSCol Column="4">
+        <BSLabel>Firm Certifications / Awards / Recognitions / Testimonials (optional)</BSLabel>
+    </BSCol>
+    <BSCol Position="Position.Relative" Column="6">
+        <BSInputFile ValidWhen="@(() => Modal.isFirmCertificationsEnabled)" OnChange="OnFirmCertificationsUpload" />
+        <BSFeedback For="@(() => Modal.isFirmCertificationsEnabled)" ValidMessage="" />
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="5">
+        <BSInput InputType="InputType.Select" @bind-Value="Modal.SelectedSkill">
+            <option value=null>Select the skill</option>
+            <option value="Coding">Coding Skills</option>
+            <option value="Database">Database</option>
+            <option value="ProjectManagement">ProjectManagement</option>
+        </BSInput>
+    </BSCol>
+    <BSCol Align="Align.Center">
+        <BSLabel>(Or)</BSLabel>
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="5">
+        <BSInput InputType="InputType.Text" @bind-Value="Modal.SkillCertificationsEntered" placeholder="Enter the skill" />
+        <BSFeedback For="@(() => Modal.SkillCertificationsEntered)" ValidMessage="" />
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="12">
+        <BSLabel>Upload selected skill certifications</BSLabel>
+        <BSInputFile ValidWhen="@(() => Modal.isSkillCertificationsEnabled)" OnChange="OnSelectedSkillCertificationsUpload" />
+        <BSFeedback For="@(() => Modal.isSkillCertificationsEnabled)" ValidMessage="" />
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="12">
+        <BSInput InputType="InputType.Select" @onchange="SelectCompetency" @bind-Value="Modal.SelectedCompetency">
+            <option value=null>Select the multiple competencies</option>
+            <option value="GREATERSIMPLICITY">GREATER SIMPLICITY</option>
+            <option value="BETTERCOMMUNICATION">BETTER COMMUNICATION</option>
+            <option value="BETTERHRCOORDINATION">BETTER HR COORDINATION</option>
+        </BSInput>
+    </BSCol>
+
+    @*    <BSCol Position="Position.Relative" ColumnMedium="5">
+    <BSLabel>Academic Certifications / Awards / Recognitions / Testimonials (optional)</BSLabel>
+    </BSCol>
+    <BSCol Position="Position.Relative" ColumnMedium="6">
+    <BSInputFile ValidWhen="@(() => Modal.isAcademicCertificationsEnabled)" OnChange="OnAcademicCertificationsUpload" />
+    <BSFeedback For="@(() => Modal.isAcademicCertificationsEnabled)" ValidMessage="" />
+    </BSCol>*@
+
+
+
+    <BSButton IsSubmit="true" Class="btnsubmit" Target="" Color="BSColor.Primary">Submit</BSButton>
+
+</BSForm>
+@code {
+    private CSPModal Modal { get; set; } = new CSPModal();
+    private string _message { get; set; } = string.Empty;
+
+
+
+    private bool SetSelectedCompetency { get; set; } = false;
+    private bool onSuccess { get; set; } = false;
+    private string? status { get; set; } = "";
+
+    private bool isRegisteredOfficeChecked = false;
+    private bool isWorkLocationChecked = false;
+    private bool bothAddressTypeSelected = false;
+
+    public string? CompanyRegistrationDocValue { get; set; }
+
+
+    public void SelectCompetency(ChangeEventArgs e)
+    {
+        var value = e.Value;
+        Modal.SelectedCompetency = value.ToString();
+
+    }
+
+    public string GetSuccessMessage()
+    {
+        return onSuccess ? status = "modal1" : status = "";
+    }
+
+
+
+
+    private void RegisteredOfficeAddressCheckboxChanged(ChangeEventArgs e)
+    {
+        // get the checkbox state
+        if ((bool)e.Value)
+        {
+            isRegisteredOfficeChecked = (bool)e.Value;
+            isWorkLocationChecked = false;
+            Modal.OfficeAddressProofType = "RegisteredOfficeAddress";
+        }
+        else
+        {
+            isRegisteredOfficeChecked = (bool)e.Value;
+            Modal.OfficeAddressProofType = string.Empty;
+        }
+    }
+
+    private void WorkLocationAddressCheckboxChanged(ChangeEventArgs e)
+    {
+        // get the checkbox state
+        if ((bool)e.Value)
+        {
+            isWorkLocationChecked = (bool)e.Value;
+            isRegisteredOfficeChecked = false;
+            Modal.OfficeAddressProofType = "WorkLocationAddress";
+        }
+        else
+        {
+            isWorkLocationChecked = (bool)e.Value;
+            Modal.OfficeAddressProofType = string.Empty;
+        }
+    }
+    private void AddressTypeBothCheckboxChanged(ChangeEventArgs e)
+    {
+        // get the checkbox state
+        if ((bool)e.Value)
+        {
+            isWorkLocationChecked = (bool)e.Value;
+            isRegisteredOfficeChecked = (bool)e.Value;
+            Modal.OfficeAddressProofType = "RegisteredOfficeAddress,WorkLocationAddress";
+        }
+        else
+        {
+            isWorkLocationChecked = (bool)e.Value;
+            isRegisteredOfficeChecked = (bool)e.Value;
+            Modal.OfficeAddressProofType = string.Empty;
+        }
+    }
+
+
+
+    private async Task OnCompanyRegistrationDocUpload(InputFileChangeEventArgs e)
+    {
+        Modal.CompanyRegistrationDoc = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.CompanyRegistrationDoc = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.CompanyRegistrationDocValue = base64String;
+        }
+    }
+
+    private async Task OnCompanyLogoUpload(InputFileChangeEventArgs e)
+    {
+        Modal.isCompanyLogoUploaded = null;
+        if (e.FileCount > 0)
+        {
+            Modal.isCompanyLogoUploaded = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.UploadCompanyLogo = base64String;
+        }
+    }
+
+    private async Task OnCompanyInCorpCertUpload(InputFileChangeEventArgs e)
+    {
+        Modal.CompanyINCert = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.CompanyINCert = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.CompanyINCertValue = base64String;
+        }
+    }
+
+    private async Task OnCompanyPanCertUpload(InputFileChangeEventArgs e)
+    {
+        Modal.CompanyPanCertEnabled = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.CompanyPanCertEnabled = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.CompanyPANCert = base64String;
+        }
+    }
+
+    private async Task OnCompanyGSTCertUpload(InputFileChangeEventArgs e)
+    {
+        Modal.isGSTEnabled = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.isGSTEnabled = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.GSTRegistrationCertificate = base64String;
+        }
+
+    }
+
+    private async Task OnFirmCertificationsUpload(InputFileChangeEventArgs e)
+    {
+        Modal.isFirmCertificationsEnabled = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.isFirmCertificationsEnabled = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.FirmCertificationsValue = base64String;
+        }
+    }
+
+    private async Task OnOfficeAddressUpload(InputFileChangeEventArgs e)
+    {
+
+        Modal.isOfficeAddressUploadEnabled = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.isOfficeAddressUploadEnabled = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.OfficeAddressUploadValue = base64String;
+        }
+    }
+
+    private async Task OnSelectedSkillCertificationsUpload(InputFileChangeEventArgs e)
+    {
+        Modal.isSkillCertificationsEnabled = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.isSkillCertificationsEnabled = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.SkillCertificationsValue = base64String;
+        }
+    }
+
+
+    private async Task OnAcademicCertificationsUpload(InputFileChangeEventArgs e)
+    {
+        Modal.isAcademicCertificationsEnabled = null;
+        if (e.FileCount > 0 && e.File.ContentType == "application/pdf")
+        {
+            Modal.isAcademicCertificationsEnabled = true;
+            string base64String = string.Empty;
+            MemoryStream ms = new MemoryStream();
+            await e.File.OpenReadStream().CopyToAsync(ms);
+            var bytes = ms.ToArray();
+            base64String = Convert.ToBase64String(bytes);
+            Modal.AcademicCertificationsValue = base64String;
+        }
+    }
+
+    private async Task OnSubmit(EditContext e)
+    {
+        if (e.Validate())
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+                using var httpResponse = await client.PostAsJsonAsync($"http://localhost:5209/api/CSPProfile/CreateCorporateServiceProviderProfile", Modal);
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    // set error message for display, log to console and return
+                    string? errorMessage = httpResponse.ReasonPhrase;
+                    Console.WriteLine($"There was an error! {errorMessage}");
+                }
+                _message = "Details submitted successfully.";
+                Reset();
+                return;
+            }
+            catch (Exception ex)
+            {
+                string errorMessage = ex.ToString();
+            }
+        }
+        onSuccess = true;
+        _message = "Please enter all mandatory fields.";
+    }
+    public class CSPModal
+    {
+        [Required(ErrorMessage = "Full name must be provided.")]
+        public string? FullName { get; set; }
+        [Required(ErrorMessage = "Mobile number must be provided")]
+        public string? MobileNumber { get; set; }
+
+        [Required(ErrorMessage = "Email address must be provided.")]
+        [DataType(DataType.EmailAddress)]
+        [EmailAddress]
+        public string? EmailAddress { get; set; }
+
+        [Required(ErrorMessage = "Please provide company name")]
+        public string? CompanyName { get; set; }
+
+        [Required(ErrorMessage = "Please select company type")]
+        public string? CompanyType { get; set; }
+
+        [Required(ErrorMessage = "Please upload company registration document and must be PDF")]
+        public string? CompanyRegistrationDocValue { get; set; }
+        public bool? CompanyRegistrationDoc { get; set; }
+
+        public string? AddDateOfIncorporation { get; set; }
+
+
+        [Required(ErrorMessage = "Please enter company offerings")]
+        public string? CompanyOfferingsAndDescription { get; set; }
+
+        public string? UploadCompanyLogo { get; set; }
+        [Required(ErrorMessage = "Please upload company logo")]
+        public bool? isCompanyLogoUploaded { get; set; }
+
+        [Required(ErrorMessage = "Please enter company incorporation number")]
+        public string? CompanyINCertNumber { get; set; }
+        [Required(ErrorMessage = "Please upload incorporation certificate and must be PDF")]
+        public bool? CompanyINCert { get; set; }
+
+        public String? CompanyINCertValue { get; set; }
+
+        [Required(ErrorMessage = "Please enter company pan number")]
+        public string? CompanyPanNumber { get; set; }
+        [Required(ErrorMessage = "Please upload company pan certificate and must be PDF")]
+        public bool? CompanyPanCertEnabled { get; set; }
+        public string? CompanyPANCert { get; set; }
+
+        [Required(ErrorMessage = "Please enter GST number")]
+        public string? GSTNumber { get; set; }
+        [Required(ErrorMessage = "Please upload GST Registration certificate and must be PDF")]
+        public bool? isGSTEnabled { get; set; }
+        public string? GSTRegistrationCertificate { get; set; }
+
+
+        [Required(ErrorMessage = "Please select Office Address")]
+        public string? OfficeAddress { get; set; }
+
+
+        [Required(ErrorMessage = "Please select Office Address proof type and must be PDF")]
+        public string? OfficeAddressProofType { get; set; }
+
+        public bool? isFirmCertificationsEnabled { get; set; }
+        public string? FirmCertificationsValue { get; set; }
+
+
+        public bool? isOfficeAddressUploadEnabled { get; set; }
+        public string? OfficeAddressUploadValue { get; set; }
+
+
+        public string? SelectedSkill { get; set; }
+        public string? SkillCertificationsEntered { get; set; } = string.Empty;
+
+        public string? SkillCertificationsValue { get; set; }
+        [Required(ErrorMessage = "Please upload skill set certificate and must be PDF")]
+        public bool? isSkillCertificationsEnabled { get; set; }
+
+        [Required(ErrorMessage = "Please select Competency")]
+        public string? SelectedCompetency { get; set; }
+
+        public string? AcademicCertificationsValue { get; set; }
+        public bool? isAcademicCertificationsEnabled { get; set; }
+
+
+        [Required(ErrorMessage = "Please enter zipcode")]
+        public string? Zipcode { get; set; }
+
+        [Required(ErrorMessage = "Please enter Address Line1")]
+        public string? AddressLine1 { get; set; }
+
+        [Required(ErrorMessage = "Please enter Address Line2")]
+        public string? AddressLine2 { get; set; }
+        public string? AddressLine3 { get; set; }
+
+
+        [Required(ErrorMessage = "Please enter city")]
+        public string? City { get; set; }
+
+        [Required(ErrorMessage = "Please enter state")]
+        public string? State { get; set; }
+
+
+        [Required(ErrorMessage = "Please enter country")]
+        public string? Country { get; set; }
+
+
+        [Required(ErrorMessage = "Please enter landline number")]
+        public string? LandlineNumber { get; set; }
+
+
+
+
+
+
+
+
+
+
+    }
+    public void Reset()
+    {
+        Modal = new CSPModal();
+    }
+}
+
+
+

@@ -16,16 +16,24 @@ namespace CSP.Server.Services.GeekProfile
 
         public string CreateGeekProfile(GeekProfileInfo profile)
         {
-            _db.GeekProfiles.Add(profile);
-            _db.SaveChanges();
-            return "Created Profile Successfully";
+            try
+            {
+                _db.CSPGeekProfiles.Add(profile);
+                _db.SaveChanges();
+                return "Created Profile Successfully";
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+            }
+            return "";
         }
 
         public async Task<List<GeekProfileInfo>> GetAllGeekProfiles()
         {
             try
             {
-                var geekProfile = await Task.Run(() => _db.GeekProfiles.OrderByDescending(o => o.GeekProfileId).ToListAsync());                 
+                var geekProfile = await Task.Run(() => _db.CSPGeekProfiles.OrderByDescending(o => o.GeekProfileId).ToListAsync());                 
                 return geekProfile;
             }
             catch (Exception ex)
@@ -35,20 +43,20 @@ namespace CSP.Server.Services.GeekProfile
         }
         public GeekProfileInfo GetGeekProfileInfo(int profileId)
         {
-            GeekProfileInfo geekProfile = _db.GeekProfiles.FirstOrDefault(g => g.GeekProfileId == profileId);
+            GeekProfileInfo geekProfile = _db.CSPGeekProfiles.FirstOrDefault(g => g.GeekProfileId == profileId);
             return geekProfile;
         }
 
         public Task<string> UpdateGeekProfile(GeekProfileInfo geekProfile)
         {
-            var j = _db.GeekProfiles.Update(geekProfile);
+            var j = _db.CSPGeekProfiles.Update(geekProfile);
             _db.SaveChanges();
             return Task.FromResult("Updated Geek Profile Successfully");
         }
 
         public string DeleteGeekProfile(GeekProfileInfo geekProfile)
         {
-            _db.GeekProfiles.Remove(geekProfile);
+            _db.CSPGeekProfiles.Remove(geekProfile);
             _db.SaveChanges();
             return "Deleted Geek Profile Successfully";
         } 
